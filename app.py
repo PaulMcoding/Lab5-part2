@@ -1,49 +1,80 @@
-from flask import Flask
-from flask import request
-from flask_mysqldb import MySQL
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 import json
-mysql = MySQL()
+import psycopg2
+import getpass
+
 app = Flask(__name__)
 CORS(app)
-# My SQL Instance configurations
-# Change these details to match your instance configurations
-app.config['MYSQL_USER'] = 'A'
-app.config['MYSQL_PASSWORD'] = 'B'
-app.config['MYSQL_DB'] = 'student'
-app.config['MYSQL_HOST'] = 'db.mydomain.ie'
-mysql.init_app(app)
 
-@app.route("/add") #Add Student
-def add():
-  name = request.args.get('name')
-  email = request.args.get('email')
-  cur = mysql.connection.cursor() #create a connection to the SQL instance
-  s='''INSERT INTO students(studentName, email) VALUES('{}','{}');'''.format(name,email) # kludge - use stored proc or params
-  cur.execute(s)
-  mysql.connection.commit()
+# PostgreSQL connection configuration
+db_config = {
+    'host': 'localhost',
+    'user': 'paul',
+    'password': 'password',
+    'port': '54321',
+    'database': 'postgres'
+}
 
-  return '{"Result":"Success"}' # Really? maybe we should check!
-  
-@app.route("/") #Default - Show Data
-def read(): # Name of the method
-  cur = mysql.connection.cursor() #create a connection to the SQL instance
-  cur.execute('''SELECT * FROM students''') # execute an SQL statment
-  rv = cur.fetchall() #Retreive all rows returend by the SQL statment
-  Results=[]
-  for row in rv: #Format the Output Results and add to return string
-    Result={}
-    Result['Name']=row[0].replace('\n',' ')
-    Result['Email']=row[1]
-    Result['ID']=row[2]
-    Results.append(Result)
-  response={'Results':Results, 'count':len(Results)}
-  ret=app.response_class(
-    response=json.dumps(response),
-    status=200,
-    mimetype='application/json'
-  )
-  return ret #Return the data in a string format
+def execute_query(query, values=None):
+    connection = psycopg2.connect(**db_config)
+    cursor = connection.cursor()
+    try:
+        cursor.execute(query, values)
+        connection.commit()
+    except psycopg2.Error as e:
+        print(f"Error executing query: {e}")
+        connection.rollback()
+    finally:
+        cursor.close()
+        connection.close()
+
+@app.route("/add", methods=['POST'])  # Use POST method for adding a student
+def add_car():
+    data = request.get_json()
+    make = data['make']
+    model = data['model']
+    query = "INSERT INTO car(make, model) VALUES (%s, %s)"
+    values = (make, model)
+    execute_query(query, values)
+    return jsonify({"Result": "Success"})
+    
+@app.route("/delete", methods=['POST'])
+def delete_car():
+    data = request.get_json()
+    model = data['model']
+    query = "Delete from car where model = %s"
+    values = (model, )
+    execute_query(query, values)
+    return jsonify({"Result": "Success"})
+
+@app.route("/update", methods=['POST'])
+def update_car():
+    data = request.get_json()
+    old_model = data['old_model']
+    new_model = data['new_model']
+    query = "UPDATE car SET model = %s WHERE model = %s"
+    values = (old_model, new_model)
+    execute_query(query, values)
+    return jsonify({"Result": "Success"})
+
+@app.route("/")  # Default - Show Data
+def read_car():
+    query = "SELECT * FROM car"
+    connection = psycopg2.connect(**db_config)
+    cursor = connection.cursor()
+    try:
+        cursor.execute(query)
+        results = cursor.fetchall()
+        Cars = [{'make': row[1], 'model': row[2]} for row in results]
+        response = {'Results': Cars, 'count': len(Cars)}
+        return jsonify(response)
+    except psycopg2.Error as e:
+        print(f"Error executing query: {e}")
+        return jsonify({"error": "Internal Server Error"}), 500
+    finally:
+        cursor.close()
+        connection.close()
+
 if __name__ == "__main__":
-  app.run(host='0.0.0.0',port='8080') #Run the flask app at port 8080
-
+    app.run(host='0.0.0.0', port=8080)
