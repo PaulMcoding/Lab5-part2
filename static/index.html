@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cars List</title>
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<section id="topban">
+        <h1>Car Information</h1>
+    {% for car in cars %}
+        <p>Make: {{ car.make }}, Model: {{ car.model }}</p>
+    {% endfor %}
+    </section>
+</body>
+</html>

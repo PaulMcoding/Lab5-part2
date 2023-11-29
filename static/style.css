@@ -1,0 +1,105 @@
+body {
+    background-image: url("./images/background.jpeg");
+    background-size: 100%;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-color: gray;
+    margin: 0;
+}
+
+#topban {
+    background-color: #777777;
+    text-align: center;
+    position: sticky;
+    color: white;
+}
+
+#sideban {
+    width: 15%;
+    height: 310px;
+    float: left;
+    background-color: rgb(192, 192, 192);
+    position: fixed;
+    margin-top: 100px;
+    text-align: center;
+    border-radius: 2px;
+    border: 2px solid white;
+}
+
+.buttons {
+    text-decoration: none;
+    background-color: #6b6b6b;
+    padding: 6px 8px 6px 16px;
+    font-size: 18px;
+    color: #dedede;
+    display: block;
+    margin-top: 1px;
+}
+
+.buttons:hover {
+    background-color: #444444;
+}
+
+.buttons2 {
+    background-color: #4b4b4b;
+    margin-top: 1px;
+    text-decoration: none;
+    padding: 6px 8px 6px 16px;
+    font-size: 18px;
+    color: #dedede;
+    display: block;
+}
+
+.buttons2:hover {
+    background-color: #313131;
+}
+
+#banner {
+    background-color: rgb(192, 192, 192);
+    border-radius: 20px;
+    width: 60%;
+    height: 1760px;
+    text-align: center;
+    margin: 100px 10% 0 0;
+    border: 2px solid white;
+    float: right;
+    font-size: 20px;
+}
+
+#textarea {
+    width: 65%;
+    background-color: white;
+    border-radius: 10px;
+    margin-left: 17.5%;
+}
+
+.blk {
+    height: 4px;
+    width: 100%;
+    background-color: rgb(161, 161, 161);
+    margin: 10px 0 10px 0;
+}
+
+#title {
+    color: white;
+    opacity: 100%;
+    font-size: 30px;
+    margin-top: 20px;
+}
+
+.titles {
+    opacity: 100%;
+    font-size: 26px;
+    font-weight: bold;
+}
+
+
+.ed {
+    text-decoration: none;
+    color: purple;
+}
+
+.yrs {
+    font-size: 24px;
+    color: #e77e11;
+}

@@ -1,19 +1,18 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import json
-import psycopg2
-import getpass
+import pyodbc
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='static')
 CORS(app)
 
-# PostgreSQL connection configuration
+#PostgreSQL connection configuration
 db_config = {
-    'host': 'localhost',
+    'host': '34.16.166.137',
     'user': 'paul',
-    'password': 'password',
-    'port': '54321',
-    'database': 'postgres'
+    'password': 'password@1',
+    'port': '1433',
+    'database': 'PaulDB'
 }
 
 def execute_query(query, values=None):
@@ -28,7 +27,7 @@ def execute_query(query, values=None):
     finally:
         cursor.close()
         connection.close()
-
+    
 @app.route("/add", methods=['POST'])  # Use POST method for adding a student
 def add_car():
     data = request.get_json()
@@ -58,15 +57,34 @@ def update_car():
     execute_query(query, values)
     return jsonify({"Result": "Success"})
 
+@app.route("/html")
+def serve_html():
+    query = "SELECT * FROM car"
+    # value = "i7"
+    connection = psycopg2.connect(**db_config)
+    cursor = connection.cursor()
+    Cars = ""
+    try:
+        cursor.execute(query)
+        results = cursor.fetchall()
+        Cars = [{'make': row[1], 'model': row[2]} for row in results]
+    except psycopg2.Error as e:
+        print(f"Error executing query: {e}")
+        return jsonify({"error": "Internal Server Error"}), 500
+    finally:
+        cursor.close()
+        connection.close()
+        return render_template('index.html', cars=Cars)
+
 @app.route("/")  # Default - Show Data
 def read_car():
-    query = "SELECT * FROM car"
+    query = "SELECT * FROM testTable"
     connection = psycopg2.connect(**db_config)
     cursor = connection.cursor()
     try:
         cursor.execute(query)
         results = cursor.fetchall()
-        Cars = [{'make': row[1], 'model': row[2]} for row in results]
+        Cars = [{'make': row[1]} for row in results]
         response = {'Results': Cars, 'count': len(Cars)}
         return jsonify(response)
     except psycopg2.Error as e:
@@ -76,5 +94,5 @@ def read_car():
         cursor.close()
         connection.close()
 
-if __name__ == "__main__":
+if __name__ == "__main__" :
     app.run(host='0.0.0.0', port=8080)
